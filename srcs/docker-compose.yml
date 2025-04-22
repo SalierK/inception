@@ -1,0 +1,88 @@
+version: '3'
+
+services:
+  nginx:
+    container_name: nginx
+    build: ./requirements/nginx
+    ports:
+      - 443:443
+    volumes:
+      - wordpress_data:/var/www/html
+    restart: always
+    networks:
+      my_network:
+        ipv4_address: 172.20.0.2
+    env_file:
+      - .env
+    environment:
+      - MYSQL_HOSTNAME=${MYSQL_HOSTNAME}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+
+  mariadb:
+    container_name: mariadb
+    build: ./requirements/mariadb
+    env_file:
+      - .env
+    volumes:
+      - mariadb_data:/home/lib/mysql
+    networks:
+      my_network:
+        ipv4_address: 172.20.0.3
+    restart: always
+    environment:
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+
+  wordpress:
+    container_name: wordpress
+    depends_on:
+      - mariadb
+    build:
+      context: ./requirements/wordpress
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      my_network:
+        ipv4_address: 172.20.0.4
+    environment:
+      - MYSQL_HOSTNAME=${MYSQL_HOSTNAME}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - DOMAIN_NAME=${DOMAIN_NAME}
+      - WP_USER=${WP_USER}
+      - WP_PASSWORD=${WP_PASSWORD}
+      - WP_ADMIN_USER=${WP_ADMIN_USER}
+      - WP_ADMIN_PASSWORD=${WP_ADMIN_PASSWORD}
+    extra_hosts:
+      - "kkilitci.42.fr:172.20.0.2"
+      - "mariadb:172.20.0.3"
+
+volumes:
+  mariadb_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/data/mysql
+      o: bind
+
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/data/wordpress
+      o: bind
+
+networks:
+  my_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
