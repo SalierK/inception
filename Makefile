@@ -4,12 +4,19 @@ CREDENTIALS_FILE = secrets/credentials.txt
 DB_PASSWORD_FILE = secrets/db_password.txt
 DB_ROOT_PASSWORD_FILE = secrets/db_root_password.txt
 ENV_FILE = ./srcs/.env
+MARIADB_DATA_DIR = /home/debian/data/mariadb
+WORDPRESS_DATA_DIR = /home/debian/data/wordpress
 
 .DEFAULT_GOAL := deploy
 
 create-env:
 	@echo "📦 Creating environment file..."
-	
+	@if [ -f $(ENV_FILE) ]; then \
+		echo "📦 Environment file already exists. Skipping creation."; \
+	else \
+		echo "❌ Error: $(ENV_FILE) file is missing. Please create it manually."; \
+		exit 1; \
+	fi
 	# Backup existing .env if it exists
 	@if [ -f $(ENV_FILE) ]; then \
 		echo "💾 Backing up existing .env file..."; \
@@ -49,9 +56,26 @@ create-env:
 
 .PHONY: deploy
 deploy: create-env
-	@echo "📦 Creating required directories..."
-	@mkdir -p $${HOME}/data/wordpress
-	@mkdir -p $${HOME}/data/mysql
+	@if [ ! -f $(CREDENTIALS_FILE) ]; then \
+		echo "❌ Error: $(CREDENTIALS_FILE) file is missing. Please create it in the secrets folder."; \
+		exit 1; \
+	fi
+	@if [ ! -f $(DB_PASSWORD_FILE) ]; then \
+		echo "❌ Error: $(DB_PASSWORD_FILE) file is missing. Please create it in the secrets folder."; \
+		exit 1; \
+	fi
+	@if [ ! -f $(DB_ROOT_PASSWORD_FILE) ]; then \
+		echo "❌ Error: $(DB_ROOT_PASSWORD_FILE) file is missing. Please create it in the secrets folder."; \
+		exit 1; \
+	fi
+	@if [ ! -d $(MARIADB_DATA_DIR) ]; then \
+		echo "📂 Creating MariaDB data directory..."; \
+		mkdir -p $(MARIADB_DATA_DIR); \
+	fi
+	@if [ ! -d $(WORDPRESS_DATA_DIR) ]; then \
+		echo "📂 Creating WordPress data directory..."; \
+		mkdir -p $(WORDPRESS_DATA_DIR); \
+	fi
 	@echo "🚀 Starting services with Docker Compose..."
 	@$(DC) up -d --build
 
@@ -75,7 +99,9 @@ clean:
 	@docker network prune -f
 	@echo "🧼 Removing dangling build cache..."
 	@docker builder prune -f
-	@rm -f $(ENV_FILE)
+	@echo "💾 Removing Mount directories build cache..."
+	rm -rf $(WORDPRESS_DATA_DIR)
+	rm -rf $(MARIADB_DATA_DIR)
 
 .PHONY: fclean
 fclean: clean
