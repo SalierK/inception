@@ -53,8 +53,8 @@ create-env:
 	fi
 	
 	@echo "✅ Environment file updated successfully!"
-
 .PHONY: deploy
+
 deploy: create-env
 	@if [ ! -f $(CREDENTIALS_FILE) ]; then \
 		echo "❌ Error: $(CREDENTIALS_FILE) file is missing. Please create it in the secrets folder."; \
@@ -76,8 +76,14 @@ deploy: create-env
 		echo "📂 Creating WordPress data directory..."; \
 		mkdir -p $(WORDPRESS_DATA_DIR); \
 	fi
-	@echo "🚀 Starting services with Docker Compose..."
-	@$(DC) up -d --build
+	@echo "🔍 Checking if containers are already running..."
+	@if [ -z "$$($(DC) ps -q)" ]; then \
+		echo "🚀 Starting services with Docker Compose..."; \
+		$(DC) up -d --build; \
+	else \
+		echo "✅ Containers are already running. Skipping docker-compose up."; \
+	fi
+
 
 .PHONY: all
 all: deploy
@@ -102,6 +108,8 @@ clean:
 	@echo "💾 Removing Mount directories build cache..."
 	rm -rf $(WORDPRESS_DATA_DIR)
 	rm -rf $(MARIADB_DATA_DIR)
+	rm -rf srcs/.env
+	touch srcs/.env
 
 .PHONY: fclean
 fclean: clean

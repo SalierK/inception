@@ -1,0 +1,7 @@
+touch initial_db.sq
+chmod 777 initial_db.sq
+echo "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};
+CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+GRANT ALL PRIVILEGES ON wordpress.* TO '${MYSQL_USER}'@'%';
+FLUSH PRIVILEGES;
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';" > initial_db.sql
