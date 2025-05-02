@@ -36,14 +36,10 @@
 # fi
 
 curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+
 chmod +x wp-cli.phar
-chmod 777 -R wp-includes/
-chmod 777 -R wp-admin/
-chmod 777 -R license.txt 
-chmod 777 -R readme.html
 mv wp-cli.phar /usr/local/bin/wp
-mkdir wp-content/upgrade
-chmod 777 -R wp-content/upgrade
+
 echo "127.0.0.1 kkilitci.42.fr" | tee -a /etc/hosts > /dev/null
 mkdir wp-content/upgrade-temp-backup 
 
@@ -53,6 +49,14 @@ chown -R www-data:www-data /var/www/html
 	wp core install --url=https://kkilitci.42.fr:443 --title="To The End Of İnception" --admin_user=$WP_ADMIN_USER --admin_password=$WP_ADMIN_PASSWORD --admin_email=admin@example.com --allow-root
 	wp option update permalink_structure '/%postname%/' --allow-root
 	wp user create "$WP_USER" "$WP_USER@example.com" --role=subscriber --user_pass="$WP_PASSWORD" --allow-root
+mkdir wp-content/upgrade
+chmod 777 -R ../html
+# chmod 777 -R wp-content/upgrade
+# chmod 777 -R wp-includes/
+# chmod 777 -R wp-admin/
+# chmod 777 -R license.txt 
+# chmod 777 -R readme.html
+
 sed -i "/\/\* That's all, stop editing! Happy publishing. \*\//i define('FS_METHOD', 'direct');" wp-config.php
 sed -i "/\/\* That's all, stop editing! Happy publishing. \*\//i define('WP_HOME', 'https://kkilitci.42.fr');" wp-config.php
 sed -i "/\/\* That's all, stop editing! Happy publishing. \*\//i define('WP_SITEURL', 'https://kkilitci.42.fr');" wp-config.php
