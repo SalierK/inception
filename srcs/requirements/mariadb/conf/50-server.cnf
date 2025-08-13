@@ -9,8 +9,39 @@ datadir                 = /var/lib/mysql
 tmpdir                  = /tmp
 lc-messages-dir         = /usr/share/mysql
 
-query_cache_size        = 16M
+# Performance optimizations
+innodb_buffer_pool_size = 128M
+innodb_log_file_size    = 32M
+innodb_log_buffer_size  = 8M
+innodb_flush_log_at_trx_commit = 1
+innodb_lock_wait_timeout = 120
+
+# Query cache optimization
+query_cache_size        = 32M
+query_cache_type        = 1
+query_cache_limit       = 2M
+
+# Connection settings
+max_connections         = 100
+connect_timeout         = 5
+wait_timeout            = 600
+max_allowed_packet      = 16M
+thread_cache_size       = 128
+sort_buffer_size        = 4M
+bulk_insert_buffer_size = 16M
+tmp_table_size          = 32M
+max_heap_table_size     = 32M
+
+# Logging
 log_error = /var/log/mysql/error.log
 expire_logs_days        = 10
+max_binlog_size         = 100M
+
+# Character set
 character-set-server    = utf8mb4
 collation-server        = utf8mb4_general_ci
+
+# MyISAM settings
+myisam_recover_options  = BACKUP
+key_buffer_size         = 128M
+table_open_cache        = 400

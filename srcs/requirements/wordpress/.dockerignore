@@ -1,0 +1,17 @@
+# Documentation
+README*
+*.md
+
+# Temporary files
+*~
+*.tmp
+*.swp
+*.swo
+
+# IDE files
+.vscode
+.idea
+
+# OS files
+.DS_Store
+Thumbs.db
