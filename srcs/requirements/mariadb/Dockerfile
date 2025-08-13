@@ -8,12 +8,8 @@ RUN apt-get update && apt-get install -y \
 
 # Copy configuration files
 COPY ./conf/50-server.cnf /etc/mysql/mariadb.conf.d/
-COPY ./tools /var/www/
-
-# Initialize database
-RUN service mysql start && \
-    mysql < /var/www/initial_db.sql && \
-    rm -f /var/www/initial_db.sql
+COPY ./tools/init_db.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/init_db.sh
 
 # Add health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
@@ -21,4 +17,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
 
 EXPOSE 3306
 
+ENTRYPOINT ["/usr/local/bin/init_db.sh"]
 CMD ["mysqld"]
