@@ -23,6 +23,19 @@ services:
     networks:
       - network
 
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+    # Dependencies
+    depends_on:
+      wordpress:
+        condition: service_healthy
+
   mariadb:
     container_name: mariadb
     build: ./requirements/mariadb
@@ -36,10 +49,19 @@ services:
     env_file:
       - .env
 
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
   wordpress:
     container_name: wordpress
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     build:
       context: ./requirements/wordpress
       dockerfile: Dockerfile
@@ -50,6 +72,14 @@ services:
       - wordpress_data:/var/www/html
     networks:
       - network
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
 
 # Hizmet verilerini saklar ve ana sistem ile bağlantı kurar.
 volumes:
